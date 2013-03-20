@@ -1,9 +1,6 @@
 package com.day.crx.persistence.tar;
 
-import com.nymag.cq.stats.Actions;
-import com.nymag.cq.stats.StatAction;
-import com.nymag.cq.stats.TestStat1;
-import com.nymag.cq.stats.TestStat2;
+import com.nymag.cq.stats.*;
 import org.apache.jackrabbit.core.id.NodeId;
 import org.apache.jackrabbit.core.id.PropertyId;
 import org.apache.jackrabbit.core.persistence.PMContext;
@@ -30,7 +27,7 @@ public class TarPersistenceWrapper implements PersistenceManager {
         tarPM = new TarPersistenceManager();
         tarPM.init(context);
         log.info("TarPersistenceManager initialized");
-        actionChain = new TestStat1(new TestStat2(null));
+        actionChain = new TypeCounter(new LongestCreatedNode(new LongestLoadedNode(null)));
 
         actionLogger = new Thread(new Runnable() {
             @Override
@@ -69,12 +66,32 @@ public class TarPersistenceWrapper implements PersistenceManager {
 
     @Override
     public boolean existsReferencesTo(NodeId targetId) throws ItemStateException {
-
         return tarPM.existsReferencesTo(targetId);
     }
 
     @Override
     public synchronized void store(ChangeLog changeLog) throws ItemStateException {
+
+        for (ItemState state : changeLog.addedStates()) {
+            if (state.isNode()) {
+                NodeId id = (NodeId) state.getId();
+                actionChain.doChain(id, Actions.NODE_STORED, new HashMap<String, Object>());
+            }
+        }
+        for (ItemState state : changeLog.modifiedStates()) {
+            if (state.isNode()) {
+                NodeId id = (NodeId) state.getId();
+                actionChain.doChain(id, Actions.NODE_STORED, new HashMap<String, Object>());
+            }
+
+        }
+        for (ItemState state : changeLog.deletedStates()) {
+            if (state.isNode()) {
+                NodeId id = (NodeId) state.getId();
+                actionChain.doChain(id, Actions.NODE_STORED, new HashMap<String, Object>());
+            }
+        }
+
         tarPM.store(changeLog);
     }
 
@@ -91,7 +108,14 @@ public class TarPersistenceWrapper implements PersistenceManager {
 
     @Override
     public NodeState createNew(NodeId id) {
-        return tarPM.createNew(id);
+
+        long start = System.currentTimeMillis();
+        NodeState state = tarPM.createNew(id);
+        long end = System.currentTimeMillis();
+        Map<String, Object> props = new HashMap<String, Object>();
+        props.put("createTime", end - start);
+        actionChain.doChain(state.getNodeId(), Actions.NODE_ADDED, props);
+        return state;
     }
 
     @Override
