@@ -34,7 +34,7 @@ public class TarPersistenceWrapper implements PersistenceManager {
             public void run() {
                 while (true) {
                     try {
-                        actionLogger.sleep(1000 * 30);
+                        actionLogger.sleep(1000 * 60 * 10);
                         actionChain.logChain();
 
                     } catch (InterruptedException e) {
