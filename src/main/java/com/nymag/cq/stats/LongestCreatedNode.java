@@ -21,7 +21,12 @@ public class LongestCreatedNode extends AbstractStatAction {
 
     @Override
     public void logStat() {
-        log.info("node {} has taken the longest to create: {} ms " + longestTime.toString(), nodeId, longest);
+        log.info("node {} has taken the longest to create since the last reporting time: {} ms at " + longestTime.toString(), nodeId, longest);
+        synchronized (this){
+            longest = -1l;
+            nodeId = null;
+            longestTime = new Date();
+        }
     }
 
     @Override
