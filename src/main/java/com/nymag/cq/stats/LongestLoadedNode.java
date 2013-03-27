@@ -25,7 +25,7 @@ public class LongestLoadedNode extends AbstractStatAction {
 
     @Override
     public void logStat() {
-        log.info("node {} has taken the longest to since the last reporting time: {} ms at " + longestTime.toString(), nodeId, longest);
+        log.info("node {} has taken the longest to load since the last reporting time: {} ms at " + longestTime.toString(), nodeId, longest);
 
         synchronized (loadTimes) {
             long average = 0;

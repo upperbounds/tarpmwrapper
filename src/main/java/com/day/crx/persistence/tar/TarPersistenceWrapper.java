@@ -18,6 +18,8 @@ public class TarPersistenceWrapper implements PersistenceManager {
 
     private static Logger log = LoggerFactory.getLogger(TarPersistenceWrapper.class);
 
+    private int reportInterval = 1000 * 60 * 10;
+
     StatAction actionChain;
 
     Thread actionLogger;
@@ -35,7 +37,7 @@ public class TarPersistenceWrapper implements PersistenceManager {
                 while (true) {
                     try {
 
-                        actionLogger.sleep(1000 * 60 * 10);
+                        actionLogger.sleep(reportInterval);
                         actionChain.logChain();
 
                     } catch (InterruptedException e) {
@@ -54,6 +56,9 @@ public class TarPersistenceWrapper implements PersistenceManager {
         log.info("wrapper initialized");
     }
 
+    public void setReportInterval(String val){
+        reportInterval = Integer.valueOf(val);
+    }
     @Override
     public NodeReferences loadReferencesTo(NodeId id) throws NoSuchItemStateException, ItemStateException {
         return tarPM.loadReferencesTo(id);
