@@ -27,12 +27,14 @@ public class LongestLoadedNode extends AbstractStatAction {
     public void logStat() {
         log.info("node {} has taken the longest to since the last reporting time: {} ms at " + longestTime.toString(), nodeId, longest);
 
-        long average = 0;
-        for (Long tm : loadTimes) {
-            average += tm;
-        }
-        if (loadTimes.size() > 0) {
-            log.info("average load time was {} for the last reporting period", average / ((float) loadTimes.size()));
+        synchronized (loadTimes) {
+            long average = 0;
+            for (Long tm : loadTimes) {
+                average += tm;
+            }
+            if (loadTimes.size() > 0) {
+                log.info("average load time was {} for the last reporting period", average / ((float) loadTimes.size()));
+            }
         }
 
         synchronized (this) {
