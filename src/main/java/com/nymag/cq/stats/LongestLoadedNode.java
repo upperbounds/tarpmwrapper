@@ -56,7 +56,9 @@ public class LongestLoadedNode extends AbstractStatAction {
                 nodeId = id;
                 longestTime = new Date();
             }
-            loadTimes.add(loadTime);
+            synchronized (loadTime) {
+                loadTimes.add(loadTime);
+            }
         }
     }
 }
